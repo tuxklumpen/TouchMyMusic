@@ -1,0 +1,27 @@
+<HomeScreen>:
+	cols: 2
+	rows: 2
+	Button:
+		id: musicbutton
+		value: "music"
+		text: "Music"
+	Button:
+		id: radiobutton
+		value: "radio"
+		text: "Radio"
+	Button:
+		text: "Configuration"
+	Button:
+		text: "Random Button"
+
+<MusicScreen>:
+	Button:
+
+<RadioScreen>:
+    viewclass: 'RadioButton'
+    RecycleBoxLayout:
+        default_size: None, dp(56)
+        default_size_hint: 1, None
+        size_hint_y: None
+        height: self.minimum_height
+        orientation: 'vertical'
