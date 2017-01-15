@@ -11,6 +11,9 @@ def play_station(link):
     mpd_client.clear()
     mpd_client.add(link)
     mpd_client.play()
+    
+class PlayButton(Button):
+    
 
 class RadioButton(Button):
     def on_press(self):
@@ -25,8 +28,8 @@ class LibraryScreen(BoxLayout):
 class RadioScreen(RecycleView):
     def __init__(self, interface, **kwargs):
         super(RadioScreen, self).__init__(**kwargs)
-        self.data = [{'text' : 'SWR2', 'link' : 'http://mp3-live.swr.de/swr2_m.m3u'
-                    }]
+        self.data = [{'text' : 'SWR2', 'link' : 'http://mp3-live.swr.de/swr2_m.m3u'},
+                     {'text' : 'KJazz', 'link' : 'http://stream.kjzz.org/kjzz_mp3_128.pls'}]
                     
 class SpotifyScreen(BoxLayout):
     def __init__(self, interface, **kwargs):
@@ -36,10 +39,6 @@ class HomeScreen(GridLayout):
     def __init__(self, interface, **kwargs):
         super(HomeScreen, self).__init__(**kwargs)
         self.interface = interface
-      
-        
-    def show(self, widgetid):
-        self.interface.show(self.widgets[widgetid](self.interface))
         
 class Interface(BoxLayout):
     def __init__(self,**kwargs):
@@ -61,13 +60,25 @@ class Interface(BoxLayout):
         self.clear_widgets()
         self.add_widget(self.widgets[widgetid.value](self))
     
+class StatusBar(BoxLayout):
+    pass
+    
+class OverlayInterface(BoxLayout):
+    def __init__(self, **kwargs):
+        super(OverlayInterface, self).__init__(**kwargs)
+        
+        self.add_widget(Interface())
+        
+        status_bar = StatusBar(size_hint=(1,.1))
+        self.add_widget(status_bar)
+    
 class TmmApp(App):
     def build(self):
-        return Interface()
+        return OverlayInterface()
 
 if __name__ == '__main__':
     mpd_client = MPDClient()
-    mpd_client.connect('localhost', 6600)
+    mpd_client.connect('192.168.55.138', 6600)
     
     TmmApp().run()
     
