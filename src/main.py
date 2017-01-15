@@ -9,7 +9,7 @@ mpd_client = None
 
 def play_station(link):
     mpd_client.clear()
-    mpd_client(link)
+    mpd_client.add(link)
     mpd_client.play()
 
 class RadioButton(Button):
