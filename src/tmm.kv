@@ -1,11 +1,19 @@
 <OverlayInterface>:
 	orientation : 'vertical'
 
+<PlayButton>:
+	text: "Play"
+	
 <StatusBar>:
 	Button:
-	Button:
-	Button:
-	Button:
+		id: home
+		text: "Home"
+		value: "home"
+		on_press: root.interface.show(args[0])
+	PlayButton:
+		id: playpause
+	StatusLabel:
+		id: status
 
 <HomeScreen>:
 	cols: 2
@@ -29,7 +37,11 @@
 		text: "Random Button"
 
 <LibraryScreen>:
+	TextInput:
+		id: searchinput
 	Button:
+		id: searchbutton
+		text: "Search"
 
 <RadioScreen>:
     viewclass: 'RadioButton'
