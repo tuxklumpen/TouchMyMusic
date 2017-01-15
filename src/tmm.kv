@@ -2,19 +2,24 @@
 	cols: 2
 	rows: 2
 	Button:
-		id: musicbutton
-		value: "music"
-		text: "Music"
+		id: librarybutton
+		value: "library"
+		text: "Library"
+		on_press: root.interface.show(args[0])
 	Button:
 		id: radiobutton
 		value: "radio"
 		text: "Radio"
+		on_press: root.interface.show(args[0])
 	Button:
-		text: "Configuration"
+		id: spotifybutton
+		value: "spotify"
+		text: "Spotify"
+		on_press: root.interface.show(args[0])
 	Button:
 		text: "Random Button"
 
-<MusicScreen>:
+<LibraryScreen>:
 	Button:
 
 <RadioScreen>:
@@ -25,3 +30,6 @@
         size_hint_y: None
         height: self.minimum_height
         orientation: 'vertical'
+        
+<SpotifyScreen>:
+	Button:
