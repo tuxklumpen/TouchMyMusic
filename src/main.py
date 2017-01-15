@@ -5,15 +5,18 @@ from kivy.uix.recycleview import RecycleView
 from kivy.uix.button import Button
 from mpd import MPDClient
 
+mpd_client = None
+
+def play_station(link):
+    mpd_client.clear()
+    mpd_client(station.link)
+    mpd_client.play()
+
 class RadioButton(Button):
     def on_press(self):
         print('play ', self.text, ' link ', self.link)
-        client = MPDClient()
-        client.connect('localhost', 6600)
-        client.add(self.link)
-        client.play()
-        client.close()
-        client.disconnect()
+        play_station(self.link)
+
 
 class LibraryScreen(BoxLayout):
     def __init__(self, interface, **kwargs):
@@ -63,4 +66,10 @@ class TmmApp(App):
         return Interface()
 
 if __name__ == '__main__':
+    mpd_client = MPDClient()
+    mpd_client.connect('localhost', 6600)
+    
     TmmApp().run()
+    
+    mpd_client.close()
+    mpd_client.disconnect()
