@@ -15,6 +15,15 @@
 	StatusLabel:
 		id: status
 
+<PlayList>
+    viewclass: 'Label'
+    RecycleBoxLayout:
+        default_size: None, dp(56)
+        default_size_hint: 1, None
+        size_hint_y: None
+        height: self.minimum_height
+        orientation: 'vertical'
+
 <HomeScreen>:
 	cols: 2
 	rows: 2
@@ -36,12 +45,38 @@
 	Button:
 		text: "Random Button"
 
+<ArtworkSlider>
+	viewclass: 'Album'
+	RecycleGridLayout:
+		cols : 3
+        default_size: None, root.height/2
+        default_size_hint: 1, None
+        size_hint_y: None
+        height: self.minimum_height
+        
+<Album>
+	orientation : 'vertical'
+	AsyncImage:
+		id : cover
+	Label:
+		id : title
+		halign : 'center'
+		valign : 'center'
+		size_hint: 1, 0.1
+		text_size : self.size	
+
 <LibraryScreen>:
-	TextInput:
-		id: searchinput
-	Button:
-		id: searchbutton
-		text: "Search"
+	orientation : 'vertical'
+	BoxLayout:
+		size_hint: 1, 0.05
+		TextInput:
+			id: searchinput
+		Button:
+			id: searchbutton
+			text: "Search"
+			on_press: root.search()
+	ArtworkSlider:
+		id: result
 
 <RadioScreen>:
     viewclass: 'RadioButton'

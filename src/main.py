@@ -6,8 +6,48 @@ from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.event import EventDispatcher
 from kivy.properties import ObjectProperty
+from kivy.uix.image import AsyncImage
+from kivy.uix.behaviors import ButtonBehavior
+from kivy.uix.recycleview.views import RecycleDataViewBehavior
+from kivy.uix.popup import Popup
+from spotifycover import get_images
 from mpd import MPDClient
+from os import path
+import urllib
 import threading
+
+FILE = 'file'
+ARTIST = 'artist'
+ALBUM = 'album'
+TITLE = 'title'
+
+class Album(RecycleDataViewBehavior, ButtonBehavior, BoxLayout):
+    def __init__(self, **kwargs):
+        super(Album, self).__init__(**kwargs)
+        
+    def refresh_view_attrs(self, rv, index, data):
+        self.ids['title'].text = data['title']
+        if 'cover' in data['data'].keys():
+            print(data['data']['cover'])
+            self.ids['cover'].source = data['data']['cover']
+        else:
+            self.ids['cover'].source = 'https://upload.wikimedia.org/wikipedia/en/f/fa/Keith_Jarrett_Koln_Concert_Cover.jpg'
+        return super(Album, self).refresh_view_attrs(
+            rv, index, data)
+        
+    def on_press(self):
+        player.play_tracks(self.data['tracks'])
+
+class ArtworkSlider(RecycleView):
+    def __init__(self, **kwargs):
+        super(ArtworkSlider, self).__init__(**kwargs)
+        
+    def update(self, albums):
+        self.data = []
+        for album, data in albums.items():
+            self.data.append({'title' : album, 'data' : data})
+            
+        print(self.data)
 
 class Player():
     def __init__(self, **kwargs):
@@ -16,6 +56,7 @@ class Player():
         
     def connect(self):        
         self.mpd_client.connect('192.168.55.138', 6600)
+        pass
         
     def disconnect(self):
         self.mpd_client.clear()    
@@ -31,7 +72,19 @@ class Player():
         self.mpd_client.pause()
         
     def search(self, string):
-        res = self.mpd_client.find("any", string)  
+        res = self.mpd_client.search("any", string)  
+        return res
+    
+    def play_tracks(self, tracks):
+        self.mpd_client.clear()
+        for track in tracks:
+            self.mpd_client.add(track['file'])
+        self.mpd_client.play()
+        
+    def list(self):
+        playlist = ["{0} - {1} - {2}".format(song['title'], song['album'], song['artist']) for song in self.mpd_client.playlistinfo()]
+        print(playlist)
+        return playlist
 
 class RadioButton(Button):
     def on_press(self):
@@ -41,6 +94,39 @@ class RadioButton(Button):
 class LibraryScreen(BoxLayout):
     def __init__(self, interface, **kwargs):
         super(LibraryScreen, self).__init__(**kwargs)
+        
+    def search(self):
+        search_string = self.ids['searchinput'].text
+        res = player.search(search_string)
+        
+        print(res)
+        
+        local_res = {}
+        spotify_res = {}
+        for r in res:
+            if 'local' in r[FILE]:
+                if 'track' in r[FILE]:
+                    if r[ALBUM] not in local_res.keys():
+                        local_res[r[ALBUM]] = {'tracks' : []}
+                    local_res[r[ALBUM]]['tracks'].append(r)
+         
+        for r in res:
+            if 'spotify' in r[FILE]:
+                if 'track' in r[FILE]:
+                    if  r[ALBUM] not in local_res.keys():
+                        if r[ALBUM] not in spotify_res.keys():
+                            spotify_res[r[ALBUM]] = {'tracks' : [], 'uri' : r['x-albumuri']}
+                        spotify_res[r[ALBUM]]['tracks'].append(r)
+                        
+        cover_art = get_images([spotify_res[album]['uri'] for album in spotify_res.keys()])
+        for album in spotify_res.keys():            
+            url = spotify_res[album]['uri']
+            spotify_res[album]['cover'] = cover_art[url][0]['url']
+    
+        albums = local_res
+        albums.update(spotify_res)
+        
+        self.ids['result'].update(albums)
 
 class RadioScreen(RecycleView):
     def __init__(self, interface, **kwargs):
@@ -91,10 +177,21 @@ class PlayButton(Button):
         print("Play/Pause")
         player.play_pause()
         
-class StatusLabel(Label):
+class PlayList(RecycleView):
+    def __init__(self, data, **kwargs):
+        super(PlayList, self).__init__(**kwargs)
+        self.data = data
+                
+class StatusLabel(Button):
     def update(self, info):
         if 'title' in info.keys():
             self.text = info['title']
+            
+    def on_press(self):
+        playlist = player.list()
+        popup = Popup(title='Current Playlist',
+                content=PlayList(data = [{'text': item} for item in playlist]))
+        popup.open()
     
 class StatusBar(BoxLayout):
     def __init__(self, interface, **kwargs):
